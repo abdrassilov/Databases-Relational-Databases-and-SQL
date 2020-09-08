@@ -1,0 +1,64 @@
+	-- Question 1
+    -- For every situation where student A likes student B, but student B likes a different student C, return the names and grades of A, B, and C.
+select 			hs1.name, hs1.grade, 
+				hs2.name, hs2.grade, 
+                hs3.name, hs3.grade
+from			highschooler hs1, 
+				highschooler hs2, 
+				highschooler hs3,
+                likes lk1,
+                likes lk2
+where			hs1.id=lk1.id1 			and		hs2.id=lk1.id2
+and				hs2.id					not in
+(
+select 			id1
+from			likes
+where			id2=hs1.id
+)
+and				hs3.id=lk2.id2			and		hs2.id=lk2.id1;
+
+	-- Question 2
+    -- Find those students for whom all of their friends are in different grades from themselves. Return the students' names and grades.
+select			hs1.name, hs1.grade
+from			highschooler hs1
+where			hs1.grade				not in
+(
+select			hs2.grade
+from			highschooler hs2, friend fr
+where			hs1.id=fr.id1
+and				hs2.id=fr.id2
+);
+
+	-- Question 3 (works fine in MySQL Workbench)
+    -- What is the average number of friends per student? (Your result should be just one number.)
+select			count(id2)/count(distinct(id1))
+from			friend;
+
+	-- Question 4
+    -- Find the number of students who are either friends with Cassandra or are friends of friends of Cassandra. 
+    -- Do not count Cassandra, even though technically she is a friend of a friend.
+select 			count(*)
+from			friend
+where			id1					in
+(
+select			id2
+from			friend
+where			id1					in
+(
+select			ID
+from			highschooler
+where			name='Cassandra'
+)
+);
+
+	-- Question 5 (Not working in MySQL Workbench, to be resolved)
+    -- Find the name and grade of the student(s) with the greatest number of friends.
+SELECT name, grade
+FROM Highschooler INNER JOIN Friend F
+ON Highschooler.ID = F.ID1
+GROUP BY F.ID1
+HAVING COUNT(*) = (
+	SELECT MAX(COUNT_OF_FRIENDS)
+	FROM (SELECT COUNT(*) AS COUNT_OF_FRIENDS
+			FROM Friend
+			GROUP BY ID1));
